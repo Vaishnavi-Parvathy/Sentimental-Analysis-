@@ -1,0 +1,15 @@
+Steps to be followed:
+
+1. Go to your command prompt and change your directory to the path in which you have your project files
+
+2. Copy the following code - venv\Scripts\activate
+
+3. Install necessary libraries:
+         Tweepy-   pip install tweepy
+         Textblob- pip install textblob
+         flask-    pip install flask
+
+(Do not repeat the above installation procress every time when you activate virtual environment)
+
+4.copy the code to view the host- python app.py
+ 

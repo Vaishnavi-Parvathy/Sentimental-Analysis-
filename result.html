@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <title>Sentiment analysis results for {{keyword}}</title>
+
+</head>
+
+<body>
+    <div class="p-3 mb-2 bg-dark text-white">
+    <div class="container" >
+        <h2>Enter a word</h2>
+        <form action="/results" method="post">
+            <div class="row justify-content-md-center">
+                <div class="col">
+                    <input type="text" class="form-control" id="exampleInputEmail1" name='keyword'
+                        autocomplete="off" value="{{keyword}}">
+                </div> 
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </form>
+        </br>
+        <p class="font-italic">Results for {{keyword}}</p>
+        <!-- Content here -->
+        <div class="row" id="cards">
+            <div class="col">
+                <div class="card border border-success shadow p-3 mb-5 bg-white rounded-lg dark" >
+                    <div class="card-body" >
+<p><a href="#" class="text-dark">
+                        <h2 class="text-center">{{values[0]}}</h2>
+                        
+                        <p class="text-center">Positive</p>
+                        </a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border border-primary shadow p-3 mb-5 bg-white rounded-lg">
+                    <div class="card-body ">
+                        <p><a href="#" class="text-dark">
+                        <h2 class="text-center">{{values[2]}}</h2>
+                        <p class="text-center">Neutral</p>
+                        </a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border border-danger shadow p-3 mb-5 bg-white rounded-lg">
+                    <div class="card-body">
+                        <p><a href="#" class="text-dark">  
+                        <h2 class="text-center">{{values[1]}}</h2>
+                        <p class="text-center">Negative</p>
+                        </a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if outcome == "positive" %}
+        <div class="alert alert-success shadow p-3 mb-5  rounded" role="alert">
+            {{msg}}
+        </div>
+        {% elif outcome == "negative" %}
+        <div class="alert alert-danger shadow p-3 mb-5  roundedr" role="alert">
+            {{msg}}
+        </div>
+        {% elif outcome == "neutral" %}
+        <div class="alert alert-info shadow p-3 mb-5  rounded" role="alert">
+            {{msg}}
+        </div>
+        {% endif %}
+        <!-- <h3 class="pb-2">Top 2 tweets</h3> -->
+
+        <div class="row pt-3 pb-3">
+            <div class="col">
+                <div class="card shadow p-3 mb-5 bg-white rounded">
+                    <p><a href="#" class="text-dark">
+                    <p class="font-weight-bolder text-center">Tweet vs Polarity</p>
+                    <canvas id="live"></canvas> </a></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row pb-3 shadow p-3 mb-5 bg-white rounded" id="otherDiv">
+            <div class="col">
+                <div class="card">
+                    <p><a href="#" class="text-dark">
+                    <p class="font-weight-bolder text-center">Bar chart representation </p>
+                    <canvas id="bar"></canvas></a></p>
+                </div>
+                
+            </div>
+            <div class="col">
+                <div class="card">
+                    <p><a href="#" class="text-dark">
+                    <p class="font-weight-bolder text-center">Pie chart representation</p>
+                    <canvas id="pie"></canvas> </a></p>
+                </div>
+
+            </div>
+        </div>
+        <div class="row pb-3 shadow p-3 mb-5 bg-white rounded" id="lineDiv">
+            <div class="col">
+                <div class="card">
+                    <p><a href="#" class="text-dark">
+                    <p class="font-weight-bolder text-center">Line chart representation</p>
+                    <canvas id="line"></canvas></a></p>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+    </div>
+    <script>
+
+
+        var values = {{values|safe}}
+        var labels = {{labels|safe}}
+        var tweetData = {{tweetData|safe}}
+        liveDataLabels = []
+        var liveData = []
+        let liveChartDone = false
+        function updateData(i) {
+            setTimeout(function (){
+                mylive.data.datasets[0].data.push(tweetData[i].polarity)
+                mylive.data.labels.push(i+1)
+                mylive.update()
+            }, 1000* i)
+        }
+
+        
+        // console.log(liveData)
+
+        var liveConfig = {
+            type: 'line',
+            data: {
+                datasets: [{
+                    data: [],
+                    label: 'polarity',
+                    fill: false,
+                    backgroundColor: '##E678B9',
+                    borderColor: 'rgba(93, 207, 207, 0.5)'
+                    // xAxisID: 'tweets',
+                    // yAxisID: 'polarity'
+                }],
+                labels: []
+            }
+        }
+        var pieConfig = {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: values,
+                    label: 'Polarity',
+                    backgroundColor: [
+                    'rgba(99, 207, 93, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    ],
+                    borderColor: [
+                    'rgba(99, 207, 93, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    ],
+                }],
+                labels: labels
+            }
+        }
+        var barConfig = {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    backgroundColor: [
+                        'rgba(99, 207, 93, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                    ],
+                    borderColor: [
+                        'rgba(99, 207, 93, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                    ],
+                    borderWidth: 1,
+                    data: values,
+                    label: 'Count',
+                }
+            ],
+                labels: labels,
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+
+        }
+        var lineConfig = {
+            type: 'line',
+            data: {
+                datasets: [{
+                    data: values,
+                    showline: true,
+                    fill: false,
+                    label: 'Count',
+                    backgroundColor: '##E678B9',
+                    borderColor: 'rgba(93, 207, 207, 0.5)'
+                }],
+                labels: labels
+            }
+        }
+        window.onload = function () {
+            
+            var live = document.getElementById('live').getContext('2d');
+
+            
+            window.mylive = new Chart(live, liveConfig);
+            for (let i=0;i<100;i++) { 
+                updateData(i)
+                 }
+            var pie = document.getElementById('pie').getContext('2d');
+            var bar = document.getElementById('bar').getContext('2d');
+            var line = document.getElementById('line').getContext('2d');
+            window.myPie = new Chart(pie, pieConfig);
+            window.myBar = new Chart(bar, barConfig);
+            window.myline = new Chart(line, lineConfig);
+
+
+        };
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+</body>
+
+</html>
+
